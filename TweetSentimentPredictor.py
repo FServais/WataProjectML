@@ -1,4 +1,5 @@
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import svm
 
 def read_dictionary(filePath):
     """ Read dictionary of words and extract all the words in it.
@@ -31,11 +32,14 @@ def read_tweets_labelled(filePath):
 
 
 
-def extract_sparse_matrix_and_class(tweets):
+def extract_sparse_matrix(tweets):
     vectorizer = CountVectorizer(min_df=1)
 
     X = vectorizer.fit_transform(tweets)
-    return X
+    return X, vectorizer
+
+def extract_new_line(line):
+    return vectorizer.transform(line)
 
 
 ######################### Script
@@ -45,6 +49,13 @@ TWEETS_LABELLED_FILE = 'test_ml.txt'
 
 words_from_dict = read_dictionary(DICTIONARY_FILE)
 tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
-X = extract_sparse_matrix_and_class(tweets)
+X, vectorizer = extract_sparse_matrix(tweets)
 y = classes
 
+# Classifier
+clf = svm.SVC()
+clf.fit(X, y)
+
+X_test = ["Mike is wonderful"]
+y_test = clf.predict(extract_new_line(X_test))
+print(y_test)
