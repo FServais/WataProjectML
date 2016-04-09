@@ -1,0 +1,5 @@
+this is first tweet,1
+second string,1
+third tweet,0
+lorem ipsum,0
+dolores machin,1
