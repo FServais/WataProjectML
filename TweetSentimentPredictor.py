@@ -1,3 +1,5 @@
+from sklearn.feature_extraction.text import CountVectorizer
+
 def read_dictionary(filePath):
     """ Read dictionary of words and extract all the words in it.
     Note: Format of a line of the dictionary: 'type=... len=... word1=<WORD EXTRACTED> pos1=... stemmed1=... priorpolarity=...'
@@ -15,19 +17,25 @@ def read_tweets_labelled(filePath):
     """ Read file containing tweets and their correspinding class.
     Note: Format of a line of the file: <TWEET>,<CLASS>, where <CLASS> is either 0 (positive) or 1 (negative)
     :param filePath: Path to the file.
-    :return:dict() with the tweet as the key and the class as value.
+    :return: Tuple with a list of string of the tweets, and a list of the corresponding classes
     """
     with open(filePath) as f:
         content = f.readlines()
 
     lines = [x.rstrip('\n').split(",") for x in content]
-    listOfDict = list(map(lambda splittedLine: {splittedLine[0]: splittedLine[1]}, lines))
 
-    toReturn = {}
-    for d in listOfDict:
-        toReturn.update(d)
+    tweets = [line[0] for line in lines]
+    classes = [line[1] for line in lines]
 
-    return toReturn
+    return tweets, classes
+
+
+
+def extract_sparse_matrix_and_class(tweets):
+    vectorizer = CountVectorizer(min_df=1)
+
+    X = vectorizer.fit_transform(tweets)
+    return X
 
 
 ######################### Script
@@ -36,6 +44,7 @@ DICTIONARY_FILE = '../WataProject/sentiment-dict.txt'
 TWEETS_LABELLED_FILE = 'test_ml.txt'
 
 words_from_dict = read_dictionary(DICTIONARY_FILE)
-tweets_labelled = read_tweets_labelled(TWEETS_LABELLED_FILE)
-
+tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
+X = extract_sparse_matrix_and_class(tweets)
+y = classes
 
