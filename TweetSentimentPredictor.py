@@ -2,6 +2,8 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import tree
 from sklearn import svm
 
+from utils import get_random_state
+
 def read_dictionary(filePath):
     """ Read dictionary of words and extract all the words in it.
     Note: Format of a line of the dictionary: 'type=... len=... word1=<WORD EXTRACTED> pos1=... stemmed1=... priorpolarity=...'
@@ -66,9 +68,9 @@ X, vectorizer = extract_sparse_matrix(tweets)
 y = classes
 
 # Classifier
-clf = svm.SVC(kernel='linear')
-# clf = svm.LinearSVC()
-# clf = tree.DecisionTreeClassifier()
+clf = svm.SVC(kernel='linear', random_state=get_random_state())
+# clf = svm.LinearSVC(random_state=get_random_state())
+# clf = tree.DecisionTreeClassifier(random_state=get_random_state())
 clf.fit(X, y)
 
 X_test = ["limiting breaking trick leak"]
