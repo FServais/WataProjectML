@@ -26,7 +26,7 @@ def read_tweets_labelled(filePath):
     lines = [x.rstrip('\n').split(",") for x in content]
 
     tweets = [line[0] for line in lines]
-    classes = [line[1] for line in lines]
+    classes = [int(line[1]) for line in lines]
 
     return tweets, classes
 
@@ -41,6 +41,13 @@ def extract_sparse_matrix(tweets):
 def extract_new_line(line):
     return vectorizer.transform(line)
 
+def result_string(clazz):
+    if clazz == 0:
+        return 'Positive'
+    elif clazz == 1:
+        return 'Negative'
+
+    return ''
 
 ######################### Script
 
@@ -58,4 +65,5 @@ clf.fit(X, y)
 
 X_test = ["Mike is wonderful"]
 y_test = clf.predict(extract_new_line(X_test))
-print(y_test)
+
+print("'" + X_test[0] + "'" + " is " + result_string(y_test[0]))
