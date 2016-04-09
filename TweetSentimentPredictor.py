@@ -1,4 +1,5 @@
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn import tree
 from sklearn import svm
 
 def read_dictionary(filePath):
@@ -57,7 +58,7 @@ def result_string(clazz):
 ######################### Script
 
 DICTIONARY_FILE = '../WataProject/sentiment-dict.txt'
-TWEETS_LABELLED_FILE = 'test_ml.txt'
+TWEETS_LABELLED_FILE = '../WataProject/training_data_file.csv'
 
 words_from_dict = read_dictionary(DICTIONARY_FILE)
 tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
@@ -65,10 +66,13 @@ X, vectorizer = extract_sparse_matrix(tweets)
 y = classes
 
 # Classifier
-clf = svm.SVC()
+clf = svm.SVC(kernel='linear')
+# clf = svm.LinearSVC()
+# clf = tree.DecisionTreeClassifier()
 clf.fit(X, y)
 
-X_test = ["Mike is wonderful"]
+X_test = ["limiting breaking trick leak"]
 y_test = clf.predict(extract_new_line(X_test))
 
+print(y_test)
 print("'" + X_test[0] + "'" + " is " + result_string(y_test[0]))
