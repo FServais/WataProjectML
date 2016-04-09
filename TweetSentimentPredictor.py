@@ -25,5 +25,14 @@ def read_tweets_labelled(filePath):
 
     return toReturn
 
-words_from_dict = read_dictionary("../WataProject/sentiment-dict.txt")
-tweets_labelled = read_tweets_labelled("test_ml.txt")
+
+######################### Script
+
+DICTIONARY_FILE = '../WataProject/sentiment-dict.txt'
+TWEETS_LABELLED_FILE = 'test_ml.txt'
+
+words_from_dict = read_dictionary(DICTIONARY_FILE)
+tweets_labelled = read_tweets_labelled(TWEETS_LABELLED_FILE)
+
+
+
