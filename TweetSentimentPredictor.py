@@ -32,10 +32,15 @@ def read_tweets_labelled(filePath):
 
 
 
-def extract_sparse_matrix(tweets):
+def extract_sparse_matrix(documents):
+    """
+    Extract the document-term matrix from the documents.
+    :param documents:
+    :return:
+    """
     vectorizer = CountVectorizer(min_df=1)
 
-    X = vectorizer.fit_transform(tweets)
+    X = vectorizer.fit_transform(documents)
     return X, vectorizer
 
 def extract_new_line(line):
