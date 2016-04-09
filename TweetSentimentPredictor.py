@@ -1,7 +1,9 @@
 def read_dictionary(filePath):
-    # Read dictionary of words and extract all the words in it.
-    # Format of a line of the dictionary: 'type=... len=... word1=<WORD EXTRACTED> pos1=... stemmed1=... priorpolarity=...'
-    # Returns a list of words
+    """ Read dictionary of words and extract all the words in it.
+    Note: Format of a line of the dictionary: 'type=... len=... word1=<WORD EXTRACTED> pos1=... stemmed1=... priorpolarity=...'
+    :param filePath: Path to the dictionary.
+    :return: list of words of the dictionary.
+    """
     with open(filePath) as f:
         content = f.readlines()
 
@@ -10,9 +12,11 @@ def read_dictionary(filePath):
 
 
 def read_tweets_labelled(filePath):
-    # Read file containing tweets and their correspinding class.
-    # Format of a line of the file: <TWEET>,<CLASS>, where <CLASS> is either 0 (positive) or 1 (negative)
-    # Returns a dict() with the tweet as the key and the class as value.
+    """ Read file containing tweets and their correspinding class.
+    Note: Format of a line of the file: <TWEET>,<CLASS>, where <CLASS> is either 0 (positive) or 1 (negative)
+    :param filePath: Path to the file.
+    :return:dict() with the tweet as the key and the class as value.
+    """
     with open(filePath) as f:
         content = f.readlines()
 
@@ -33,6 +37,5 @@ TWEETS_LABELLED_FILE = 'test_ml.txt'
 
 words_from_dict = read_dictionary(DICTIONARY_FILE)
 tweets_labelled = read_tweets_labelled(TWEETS_LABELLED_FILE)
-
 
 
