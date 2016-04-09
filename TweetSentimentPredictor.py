@@ -35,19 +35,14 @@ def read_tweets_labelled(filePath):
 
 
 
-def extract_sparse_matrix(documents):
+def extract_sparse_matrix(documents, vectorizer):
     """
     Extract the document-term matrix from the documents.
     :param documents:
     :return:
     """
-    vectorizer = CountVectorizer(min_df=1)
-
-    X = vectorizer.fit_transform(documents)
-    return X, vectorizer
-
-def extract_new_line(line):
-    return vectorizer.transform(line)
+    X = vectorizer.transform(documents)
+    return X
 
 def result_string(clazz):
     if clazz == 0:
@@ -57,6 +52,14 @@ def result_string(clazz):
 
     return ''
 
+def words_from_tweets(tweets):
+    s = set()
+    for tweet in tweets:
+        for word in tweet.split(" "):
+            s.add(word)
+
+    return s
+
 ######################### Script
 
 DICTIONARY_FILE = '../WataProject/sentiment-dict.txt'
@@ -64,7 +67,10 @@ TWEETS_LABELLED_FILE = '../WataProject/training_data_file.csv'
 
 words_from_dict = read_dictionary(DICTIONARY_FILE)
 tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
-X, vectorizer = extract_sparse_matrix(tweets)
+
+vectorizer = CountVectorizer(min_df=1, vocabulary=set(words_from_dict).union(words_from_tweets(tweets)), lowercase=True)
+
+X = extract_sparse_matrix(tweets, vectorizer)
 y = classes
 
 # Classifier
@@ -73,8 +79,8 @@ clf = svm.SVC(kernel='linear', random_state=get_random_state())
 # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
 clf.fit(X, y)
 
-X_test = ["limiting breaking trick leak"]
-y_test = clf.predict(extract_new_line(X_test))
+X_test = ["accused of protests leave"]
+y_test = clf.predict(extract_sparse_matrix(X_test, vectorizer))
 
 print(y_test)
 print("'" + X_test[0] + "'" + " is " + result_string(y_test[0]))
