@@ -1,6 +1,9 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import tree
 from sklearn import svm
+from sklearn.cross_validation import KFold
+
+import numpy as np
 
 from utils import get_random_state
 
@@ -31,7 +34,7 @@ def read_tweets_labelled(filePath):
     tweets = [line[0] for line in lines]
     classes = [int(line[1]) for line in lines]
 
-    return tweets, classes
+    return np.array(tweets), np.array(classes)
 
 
 
@@ -74,20 +77,34 @@ vectorizer = CountVectorizer(min_df=1, vocabulary=set(words_from_dict).union(wor
 
 index_training_set = round(PERCENTAGE_TRAINING * len(classes))
 
-X_train = extract_sparse_matrix(tweets[:index_training_set], vectorizer)
-y_train = classes[:index_training_set]
+k_fold = KFold(n=len(classes), n_folds=10)
 
-X_test = extract_sparse_matrix(tweets[index_training_set:], vectorizer)
-y_test = classes[index_training_set:]
+n_correct_tot = 0
+n_incorrect_tot = 0
 
-# Classifier
-clf = svm.SVC(kernel='linear', random_state=get_random_state())
-# clf = svm.LinearSVC(random_state=get_random_state())
-# clf = tree.DecisionTreeClassifier(random_state=get_random_state())
-clf.fit(X_train, y_train)
+for train_indices, test_indices in k_fold:
+    X_train = extract_sparse_matrix(tweets[train_indices], vectorizer)
+    y_train = classes[train_indices]
 
-X_out = ["penalty rules"]
-y_out = clf.predict(extract_sparse_matrix(X_out, vectorizer))
+    X_test = tweets[test_indices]
+    y_test = classes[test_indices]
 
-print(y_out)
-print("'" + X_out[0] + "'" + " is " + result_string(y_out[0]))
+    # Classifier
+    clf = svm.SVC(kernel='linear', random_state=get_random_state())
+    # clf = svm.LinearSVC(random_state=get_random_state())
+    # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
+    clf.fit(X_train, y_train)
+
+    # X_out = ["penalty rules", 'fegdh']
+    y_out = clf.predict(extract_sparse_matrix(X_test, vectorizer))
+
+    result = (y_out == y_test)
+    n_correct = len(result[result == True])
+    n_incorrect = len(result[result == False])
+
+    n_correct_tot += n_correct
+    n_incorrect_tot += n_incorrect
+
+print("Well classified: {:.2f}%".format(n_correct_tot*100/(n_correct_tot+n_incorrect_tot)))
+print("Misclassified: {:.2f}%".format(n_incorrect_tot*100/(n_correct_tot+n_incorrect_tot)))
+
