@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn import tree
-from sklearn import svm
+from sklearn import svm, cross_validation
 from sklearn.cross_validation import KFold
 from sklearn import grid_search
 
@@ -80,6 +80,13 @@ tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
 
 vectorizer = CountVectorizer(min_df=1, vocabulary=set(words_from_dict).union(words_from_tweets(tweets)), lowercase=True)
 
+# Select classifier
+# clf = svm.LinearSVC(random_state=get_random_state())
+# parameters = {'C': np.arange(0.01, 1.05, 0.05), 'loss': ['hinge', 'squared_hinge']}
+
+clf = tree.DecisionTreeClassifier(random_state=get_random_state())
+parameters = {'max_depth': np.arange(1, 2000, 10)}
+
 ############ Model evaluation
 print("Model evaluation")
 print("--------------------")
@@ -96,9 +103,6 @@ for train_indices, test_indices in k_fold:
     y_test = classes[test_indices]
 
     # Classifier
-    clf = svm.LinearSVC(random_state=get_random_state())
-    # clf = svm.LinearSVC(random_state=get_random_state())
-    # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
     clf.fit(X_train, y_train)
 
     # X_out = ["penalty rules", 'fegdh']
@@ -111,15 +115,18 @@ for train_indices, test_indices in k_fold:
     n_correct_tot += n_correct
     n_incorrect_tot += n_incorrect
 
-print("Well classified: {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
-print("Misclassified  : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
+print("Well classified      : {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
+print("Misclassified        : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
+print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(svm.LinearSVC(random_state=get_random_state()), extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
 print('\n')
 
+
 ############ Compute best parameters
-clf = svm.LinearSVC(random_state=get_random_state())
-parameters = {'C': np.arange(0.01, 1.05, 0.05), 'loss': ['hinge', 'squared_hinge']}
 grid = grid_search.GridSearchCV(estimator=clf, param_grid=parameters, cv=N_FOLDS)
 grid.fit(extract_sparse_matrix(tweets, vectorizer), classes)
+
+
+clf = grid.best_estimator_
 
 ############ New model evaluation
 print("New model evaluation")
@@ -135,12 +142,8 @@ for train_indices, test_indices in k_fold:
     y_test = classes[test_indices]
 
     # Classifier
-    clf = grid.best_estimator_
-    # clf = svm.LinearSVC(random_state=get_random_state())
-    # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
     clf.fit(X_train, y_train)
 
-    # X_out = ["penalty rules", 'fegdh']
     y_out = clf.predict(extract_sparse_matrix(X_test, vectorizer))
 
     result = (y_out == y_test)
@@ -150,5 +153,7 @@ for train_indices, test_indices in k_fold:
     n_correct_tot += n_correct
     n_incorrect_tot += n_incorrect
 
-print("Well classified: {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
-print("Misclassified  : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
+print("Well classified      : {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
+print("Misclassified        : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
+print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(grid.best_estimator_, extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
+print("Using grid_cv        : {:.4f} with max_depth = {}".format(grid.best_score_, grid.best_params_['max_depth']))
