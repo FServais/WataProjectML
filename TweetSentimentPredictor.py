@@ -45,9 +45,9 @@ def extract_sparse_matrix(documents, vectorizer):
     return X
 
 def result_string(clazz):
-    if clazz == 0:
+    if clazz == 1:
         return 'Positive'
-    elif clazz == 1:
+    elif clazz == -1:
         return 'Negative'
 
     return ''
@@ -79,7 +79,7 @@ clf = svm.SVC(kernel='linear', random_state=get_random_state())
 # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
 clf.fit(X, y)
 
-X_test = ["accused of protests leave"]
+X_test = ["penalty rules"]
 y_test = clf.predict(extract_sparse_matrix(X_test, vectorizer))
 
 print(y_test)
