@@ -65,22 +65,29 @@ def words_from_tweets(tweets):
 DICTIONARY_FILE = '../WataProject/sentiment-dict.txt'
 TWEETS_LABELLED_FILE = '../WataProject/training_data_file.csv'
 
+PERCENTAGE_TRAINING = 0.7 # 70% of the dataset will be the training set, the
+
 words_from_dict = read_dictionary(DICTIONARY_FILE)
 tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
 
 vectorizer = CountVectorizer(min_df=1, vocabulary=set(words_from_dict).union(words_from_tweets(tweets)), lowercase=True)
 
-X = extract_sparse_matrix(tweets, vectorizer)
-y = classes
+index_training_set = round(PERCENTAGE_TRAINING * len(classes))
+
+X_train = extract_sparse_matrix(tweets[:index_training_set], vectorizer)
+y_train = classes[:index_training_set]
+
+X_test = extract_sparse_matrix(tweets[index_training_set:], vectorizer)
+y_test = classes[index_training_set:]
 
 # Classifier
 clf = svm.SVC(kernel='linear', random_state=get_random_state())
 # clf = svm.LinearSVC(random_state=get_random_state())
 # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
-clf.fit(X, y)
+clf.fit(X_train, y_train)
 
-X_test = ["penalty rules"]
-y_test = clf.predict(extract_sparse_matrix(X_test, vectorizer))
+X_out = ["penalty rules"]
+y_out = clf.predict(extract_sparse_matrix(X_out, vectorizer))
 
-print(y_test)
-print("'" + X_test[0] + "'" + " is " + result_string(y_test[0]))
+print(y_out)
+print("'" + X_out[0] + "'" + " is " + result_string(y_out[0]))
