@@ -1,5 +1,5 @@
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn import tree
+from sklearn import tree, ensemble
 from sklearn import svm, cross_validation
 from sklearn.cross_validation import KFold
 from sklearn import grid_search
@@ -34,8 +34,13 @@ def read_tweets_labelled(filePath):
 
     lines = [x.rstrip('\n').split(",") for x in content]
 
-    tweets = [line[0] for line in lines]
-    classes = [int(line[1]) for line in lines]
+    lines_cleaned = []
+    for p in lines:
+        if len(p) > 1:
+            lines_cleaned.append(p)
+
+    tweets = [line[0] for line in lines_cleaned]
+    classes = [int(line[1]) for line in lines_cleaned]
 
     return np.array(tweets), np.array(classes)
 
@@ -55,6 +60,8 @@ def result_string(clazz):
         return 'Positive'
     elif clazz == -1:
         return 'Negative'
+    else:
+        return 'Neutral'
 
     return ''
 
@@ -84,8 +91,17 @@ vectorizer = CountVectorizer(min_df=1, vocabulary=set(words_from_dict).union(wor
 # clf = svm.LinearSVC(random_state=get_random_state())
 # parameters = {'C': np.arange(0.01, 1.05, 0.05), 'loss': ['hinge', 'squared_hinge']}
 
-clf = tree.DecisionTreeClassifier(random_state=get_random_state())
-parameters = {'max_depth': np.arange(1, 2000, 10)}
+# clf = tree.DecisionTreeClassifier(random_state=get_random_state())
+# parameters = {'max_depth': np.arange(1, 2000, 50)}
+
+clf = svm.SVC(random_state=get_random_state())
+parameters = {'C': np.arange(0.1, 1.1, 0.1), 'kernel': ['poly', 'rbf'], 'gamma': np.arange(0.00005, 0.00006, 0.000001)}
+
+# clf = ensemble.ExtraTreesClassifier(random_state=get_random_state())
+# parameters = {'criterion': ['gini']}
+
+
+new_tweets = ["New episode is awesome #GoTSeason6", "Best show ever #GoTSeason6 #ValarMorghulis", "Not that bad #GoTSeason6", "So disappointed, so slow #GoTSeason6", "Stopping watching the show, nothing like the books #GoTSeason6"]
 
 ############ Model evaluation
 print("Model evaluation")
@@ -108,6 +124,7 @@ for train_indices, test_indices in k_fold:
     # X_out = ["penalty rules", 'fegdh']
     y_out = clf.predict(extract_sparse_matrix(X_test, vectorizer))
 
+    assert(len(y_out) == len(y_test))
     result = (y_out == y_test)
     n_correct = len(result[result == True])
     n_incorrect = len(result[result == False])
@@ -117,8 +134,18 @@ for train_indices, test_indices in k_fold:
 
 print("Well classified      : {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Misclassified        : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
-print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(svm.LinearSVC(random_state=get_random_state()), extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
+print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(clf, extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
 print('\n')
+
+#### New tweets
+X_new_train = extract_sparse_matrix(tweets, vectorizer)
+y_new_train = classes
+clf.fit(X_new_train, y_new_train)
+y_new_out = clf.predict(extract_sparse_matrix(new_tweets, vectorizer))
+y_new_out_str = list(map(result_string, y_new_out))
+
+for i in range(0, len(new_tweets)):
+    print("Tweet: '" + new_tweets[i] + "' is " + y_new_out_str[i])
 
 
 ############ Compute best parameters
@@ -156,4 +183,14 @@ for train_indices, test_indices in k_fold:
 print("Well classified      : {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Misclassified        : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(grid.best_estimator_, extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
-print("Using grid_cv        : {:.4f} with max_depth = {}".format(grid.best_score_, grid.best_params_['max_depth']))
+# print("Using grid_cv        : {:.4f} with max_depth = {}".format(grid.best_score_, grid.best_params_['max_depth']))
+
+#### New tweets
+X_new_train = extract_sparse_matrix(tweets, vectorizer)
+y_new_train = classes
+clf.fit(X_new_train, y_new_train)
+y_new_out = clf.predict(extract_sparse_matrix(new_tweets, vectorizer))
+y_new_out_str = list(map(result_string, y_new_out))
+
+for i in range(0, len(new_tweets)):
+    print("Tweet: '" + new_tweets[i] + "' is " + y_new_out_str[i])
