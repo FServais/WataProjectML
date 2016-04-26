@@ -63,7 +63,6 @@ def result_string(clazz):
     else:
         return 'Neutral'
 
-    return ''
 
 
 def words_from_tweets(tweets):
@@ -88,14 +87,14 @@ tweets, classes = read_tweets_labelled(TWEETS_LABELLED_FILE)
 vectorizer = CountVectorizer(min_df=1, vocabulary=set(words_from_dict).union(words_from_tweets(tweets)), lowercase=True)
 
 # Select classifier
-# clf = svm.LinearSVC(random_state=get_random_state())
-# parameters = {'C': np.arange(0.01, 1.05, 0.05), 'loss': ['hinge', 'squared_hinge']}
+clf = svm.LinearSVC(random_state=get_random_state())
+parameters = {'C': np.arange(0.01, 1.05, 0.05), 'loss': ['hinge', 'squared_hinge']}
 
 # clf = tree.DecisionTreeClassifier(random_state=get_random_state())
 # parameters = {'max_depth': np.arange(1, 2000, 50)}
 
-clf = svm.SVC(random_state=get_random_state())
-parameters = {'C': np.arange(0.1, 1.1, 0.1), 'kernel': ['poly', 'rbf'], 'gamma': np.arange(0.00005, 0.00006, 0.000001)}
+# clf = svm.SVC(random_state=get_random_state())
+# parameters = {'C': np.arange(0.1, 1.1, 0.1), 'kernel': ['poly', 'rbf'], 'gamma': np.arange(0.00005, 0.00006, 0.000001)}
 
 # clf = ensemble.ExtraTreesClassifier(random_state=get_random_state())
 # parameters = {'criterion': ['gini']}
@@ -121,7 +120,6 @@ for train_indices, test_indices in k_fold:
     # Classifier
     clf.fit(X_train, y_train)
 
-    # X_out = ["penalty rules", 'fegdh']
     y_out = clf.predict(extract_sparse_matrix(X_test, vectorizer))
 
     assert(len(y_out) == len(y_test))
@@ -183,7 +181,6 @@ for train_indices, test_indices in k_fold:
 print("Well classified      : {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Misclassified        : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(grid.best_estimator_, extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
-# print("Using grid_cv        : {:.4f} with max_depth = {}".format(grid.best_score_, grid.best_params_['max_depth']))
 
 #### New tweets
 X_new_train = extract_sparse_matrix(tweets, vectorizer)
