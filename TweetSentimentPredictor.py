@@ -133,7 +133,6 @@ for train_indices, test_indices in k_fold:
 print("Well classified      : {:.2f}%".format(n_correct_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Misclassified        : {:.2f}%".format(n_incorrect_tot * 100 / (n_correct_tot + n_incorrect_tot)))
 print("Using cross_val_score: {:.4f}".format(cross_validation.cross_val_score(clf, extract_sparse_matrix(tweets, vectorizer), classes, cv=N_FOLDS).mean()))
-print('\n')
 
 #### New tweets
 X_new_train = extract_sparse_matrix(tweets, vectorizer)
@@ -153,6 +152,7 @@ grid.fit(extract_sparse_matrix(tweets, vectorizer), classes)
 
 clf = grid.best_estimator_
 
+print('\n')
 ############ New model evaluation
 print("New model evaluation")
 print("--------------------")
